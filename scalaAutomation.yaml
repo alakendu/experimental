@@ -1,0 +1,420 @@
+openapi: 3.0.3
+info:
+  title: OpenAPIArt Test API
+  description: |-
+    Demonstrates the features of the OpenAPIArt package
+  version: 0.0.1
+  contact:
+    x-info: "Any feedback such as bugs/enhancements/questions regarding OpenApiArt\
+      \ is \nwelcomed by using the contact url.      "
+    url: https://github.com/open-traffic-generator/openapiart/issues
+  license:
+    name: NO-LICENSE-PRESENT
+paths:
+  /create_topology:
+    post:
+      tags:
+      - Deployment
+      operationId: create_topology
+      description: |-
+        Deploy DUT and Traffic components.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Topology.Config'
+      responses:
+        '200':
+          $ref: '#/components/responses/Warnings'
+          x-field-uid: 1
+        default:
+          x-field-uid: 2
+          description: |-
+            The request did not succeed and server has responded with error details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /create_connector:
+    post:
+      tags:
+      - Deployment
+      operationId: create_connector
+      description: |-
+        Adding Connector within Traffic and DUT modules.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Connector.Config'
+      responses:
+        '200':
+          $ref: '#/components/responses/Warnings'
+          x-field-uid: 1
+        default:
+          x-field-uid: 2
+          description: |-
+            The request did not succeed and server has responded with error details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /get_topology_states:
+    post:
+      tags:
+      - Deployment
+      operationId: get_topology_states
+      description: |-
+        Request to traffic generator for states of choice
+      responses:
+        '200':
+          description: |-
+            Response from traffic generator for chosen states
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopologyStates.Response'
+          x-field-uid: 1
+        default:
+          x-field-uid: 2
+          description: |-
+            The request did not succeed and server has responded with error details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' 
+  /control/state:
+    post:
+      tags:
+      - Test
+      operationId: set_control_state
+      description: |-
+        Sets the operational state of configured resources.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Control.State'
+      responses:
+        '200':
+          $ref: '#/components/responses/Warnings'
+          x-field-uid: 1
+        default:
+          x-field-uid: 2
+          description: |-
+            The request did not succeed and server has responded with error details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' 
+  /metrics:
+    get:
+      tags:
+      - Test
+      operationId: get_metrics
+      description: |-
+        Gets metrics.
+      responses:
+        '200':
+          description: |-
+            Unique metrics response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+          x-field-uid: 1
+        default:
+          x-field-uid: 2
+          description: |-
+            The request did not succeed and server has responded with error details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'                                            
+components:
+  responses:
+    Warnings:
+      description: |-
+        Success warning payload similar to otg Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Warning.Details'
+  schemas:
+    Error.Details:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+          x-field-uid: 1
+    Warning.Details:
+      type: object
+      properties:
+        warnings:
+          type: array
+          items:
+            type: string
+          x-field-uid: 1
+    Error:
+      description: |-
+        Error response generated while serving API request.
+      type: object
+      required:
+      - code
+      - errors
+      properties:
+        code:
+          description: |-
+            Numeric status code based on underlying transport being used.
+          type: integer
+          x-field-uid: 1
+        kind:
+          description: |-
+            Kind of error message.
+          type: string
+          x-enum:
+            transport:
+              x-field-uid: 1
+            validation:
+              x-field-uid: 2
+            internal:
+              x-field-uid: 3
+          x-field-uid: 2
+          enum:
+          - transport
+          - validation
+          - internal
+        errors:
+          description: |-
+            List of error messages generated while serving API request.
+          type: array
+          items:
+            type: string
+          x-field-uid: 3
+    Topology.Config:
+      type: object
+      description: |-
+        Deploy DUT and Traffic components.
+      properties:
+        traffic_componets:
+          type: array
+          description: |-
+            Details of the components will use for Traffic emulation.          
+          items: 
+            $ref: '#/components/schemas/TrafficComponent'
+        dut_componets:
+          type: array
+          description: |-
+            Details of the components will use for DUT emulation.          
+          items: 
+            $ref: '#/components/schemas/DUTComponent'        
+    Connector.Config:
+      type: object
+      description: |-
+        Connect traffic and DUT components.
+      properties:
+        connectors:
+          type: array
+          items: 
+            $ref: '#/components/schemas/Connector'          
+    TrafficComponent:
+      required:
+        - name 
+      description: |-
+        Details of the componet use for Traffic generation.           
+      properties:
+        name:
+          description: |-
+            Name of the Traffic componet.
+          type: string
+        config:
+          description: |-
+            Traffic Configuration will use for test.        
+          type: string
+    DUTComponent:
+      required:
+        - name
+      description: |-
+        Details of the componet use for DUT emulation.           
+      properties:
+        name:
+          description: |-
+            Name of the DUT componet.
+          type: string
+        image:
+          description: |-
+            DUT will boot using that image.
+          type: string          
+        config:
+          description: |-
+            DUT Configuration will use for test.        
+          type: string          
+    Connector:
+      required:
+        - src_name
+        - dst_name
+      properties:
+        src_name:
+          type: string
+          description: |-
+            Name of the Traffic or DUT component use to Craete Topology
+            - /components/schemas/TrafficComponent/properties/name
+            - /components/schemas/DUTComponent/properties/name            
+          x-constraint:
+          - /components/schemas/TrafficComponent/properties/name
+          - /components/schemas/DUTComponent/properties/name
+        dst_name:
+          type: string
+          description: |-
+            Name of the Traffic or DUT component use to Craete Topology
+            - /components/schemas/TrafficComponent/properties/name
+            - /components/schemas/DUTComponent/properties/name            
+          x-constraint:
+          - /components/schemas/TrafficComponent/properties/name          
+          - /components/schemas/DUTComponent/properties/name 
+    TopologyStates.Response:
+      description: |-
+        Response containing chosen traffic generator states
+      type: object
+      properties:
+        choice:
+          type: string
+          enum:
+          - DUT_state
+          - traffic_state 
+    Metrics:
+      type: object
+      properties:
+        choice:
+          type: string
+          default: ports
+          x-field-uid: 1
+          x-enum:
+            ports:
+              x-field-uid: 1
+            flows:
+              x-field-uid: 2
+          enum:
+          - ports
+          - flows
+        ports:
+          type: array
+          items:
+            $ref: '#/components/schemas/Port.Metric'
+          x-field-uid: 2
+        flows:
+          type: array
+          items:
+            $ref: '#/components/schemas/Flow.Metric'
+          x-field-uid: 3
+    Port.Metric:
+      type: object
+      required:
+      - name
+      - tx_frames
+      - rx_frames
+      properties:
+        name:
+          type: string
+          x-field-uid: 1
+        tx_frames:
+          type: number
+          format: double
+          x-field-uid: 2
+        rx_frames:
+          type: number
+          format: double
+          x-field-uid: 3
+    Flow.Metric:
+      type: object
+      required:
+      - name
+      - tx_frames
+      - rx_frames
+      properties:
+        name:
+          type: string
+          x-field-uid: 1
+        tx_frames:
+          type: number
+          format: double
+          x-field-uid: 2
+        rx_frames:
+          type: number
+          format: double
+          x-field-uid: 3
+    Control.State:
+      description: |-
+        Request for setting operational state of configured resources.
+      type: object
+      required:
+      - choice
+      properties:
+        choice:
+          type: string
+          x-enum:
+            protocol:
+              x-field-uid: 2
+            traffic:
+              x-field-uid: 3
+          x-field-uid: 1
+          enum:
+          - protocol
+          - traffic
+        protocol:
+          $ref: '#/components/schemas/State.Protocol'
+          x-field-uid: 3
+        traffic:
+          $ref: '#/components/schemas/State.Traffic'
+          x-field-uid: 4 
+    State.Protocol:
+      description: |-
+        States associated with protocols on configured resources.
+      type: object
+      required:
+      - choice
+      properties:
+        choice:
+          type: string
+          enum:
+          - all
+          - route
+          - bgp  
+    State.Traffic:
+      description: |-
+        States associated with configured flows
+      type: object
+      required:
+      - choice
+      properties:
+        choice:
+          type: string
+          enum:
+          - flow_transmit 
+        flow_transmit:
+          $ref: '#/components/schemas/State.Traffic.FlowTransmit'  
+    State.Traffic.FlowTransmit:
+      description: |-
+        Provides state control of flow transmission.
+      type: object
+      required:
+      - state
+      properties:
+        state:
+          description: |-
+            The transmit state.
+            If the value of the state property is 'start' then all flows defined by the 'flow_names' property will be started and the metric counters MUST be cleared prior to starting the flow(s).
+            If the value of the state property is 'stop' then all flows defined by the 'flow_names' property will be stopped and the metric counters MUST NOT be cleared.
+            If the value of the state property is 'pause' then all flows defined by the 'flow_names' property will be paused and the metric counters MUST NOT be cleared.
+            If the value of the state property is 'resume' then any paused flows defined by the 'flow_names' property will start transmit at the point at which they were paused. Any flow that is stopped will start transmit at the beginning of the flow. The flow(s) MUST NOT have their metric counters cleared.
+          type: string
+          enum:
+          - start
+          - stop
+          - pause
+          - resume                                  
