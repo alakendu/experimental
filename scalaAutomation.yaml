@@ -11,11 +11,11 @@ info:
   license:
     name: NO-LICENSE-PRESENT
 paths:
-  /create_topology:
+  /deploy_topology:
     post:
       tags:
       - Deployment
-      operationId: create_topology
+      operationId: deploy_topology
       description: |-
         Deploy DUT and Traffic components.
       requestBody:
@@ -24,31 +24,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Topology.Config'
-      responses:
-        '200':
-          $ref: '#/components/responses/Warnings'
-          x-field-uid: 1
-        default:
-          x-field-uid: 2
-          description: |-
-            The request did not succeed and server has responded with error details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /create_connector:
-    post:
-      tags:
-      - Deployment
-      operationId: create_connector
-      description: |-
-        Adding Connector within Traffic and DUT modules.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Connector.Config'
       responses:
         '200':
           $ref: '#/components/responses/Warnings'
@@ -212,16 +187,11 @@ components:
           description: |-
             Details of the components will use for DUT emulation.          
           items: 
-            $ref: '#/components/schemas/DUTComponent'        
-    Connector.Config:
-      type: object
-      description: |-
-        Connect traffic and DUT components.
-      properties:
+            $ref: '#/components/schemas/DUTComponent' 
         connectors:
           type: array
           items: 
-            $ref: '#/components/schemas/Connector'          
+            $ref: '#/components/schemas/Connector'      
     TrafficComponent:
       required:
         - name 
